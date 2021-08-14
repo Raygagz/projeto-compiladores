@@ -14,7 +14,7 @@ public class CommandRepeticao extends AbstractCommand {
     @Override
     public String generateJavaCode() {
         StringBuilder str = new StringBuilder();
-        str.append("while (" + condition + ") {\n");
+        str.append("while (" + condition.replaceAll(" ou ", " || ").replaceAll(" e ", " && ") + ") {\n");
         for (AbstractCommand cmd : commandList) {
             str.append("\t" + cmd.generateJavaCode());
         }

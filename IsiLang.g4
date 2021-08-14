@@ -48,6 +48,12 @@ grammar IsiLang;
 		}
 	}
 
+	public void verificaOperadorValido(int tipoOp, int tipoExpr){
+		if (tipoOp != tipoExpr) {
+			throw new IsiSemanticException("This operator is cannot be applied to the desired type");
+		}
+	}
+
 	public int getTypeByID(String id){
 		return symbolTable.get(id).getType();
 	}
@@ -136,7 +142,6 @@ cmdescrita:
 	'escreva' AP termo {
             _writeID = _input.LT(-1).getText();
             } FP SC {
-		use(_input.LT(-1).getText());
         CommandEscrita cmd = new CommandEscrita(_writeID);
         stack.peek().add(cmd);
     };
@@ -151,9 +156,20 @@ cmdattrib:
     };
 
 cmdselecao:
-	'se' AP { _exprTipo = IsiVariable.DONTCARE; } expr { _exprDecision = _input.LT(-1).getText(); 
-		} OPREL { _exprDecision += _input.LT(-1).getText(); 
-		} expr {_exprDecision += _input.LT(-1).getText(); } FP ACH {stack.push(new ArrayList<AbstractCommand>());
+	'se' AP { _exprTipo = IsiVariable.DONTCARE; } expr { _exprDecision = _exprContent;
+		} (
+		OPRELNUM { verificaOperadorValido(IsiVariable.NUMBER, _exprTipo);}
+		| OPREL
+	) { _exprDecision += _input.LT(-1).getText();
+		} expr {_exprDecision += _exprContent; } (
+		OPLOG { _exprTipo = IsiVariable.DONTCARE; _exprDecision += " " + _input.LT(-1).getText() + " ";
+			} expr { _exprDecision += _input.LT(-1).getText(); 
+		} (
+			OPRELNUM { verificaOperadorValido(IsiVariable.NUMBER, _exprTipo); }
+			| OPREL
+		) { _exprDecision += _input.LT(-1).getText(); 
+		} expr { _exprDecision += _input.LT(-1).getText(); }
+	)* FP ACH {stack.push(new ArrayList<AbstractCommand>());
     } (cmd)+ FCH {
         listaTrue = stack.pop();
 		listaFalse = new ArrayList<AbstractCommand>();
@@ -168,8 +184,19 @@ cmdselecao:
 
 cmdrepeticao:
 	'enquanto' AP { _exprTipo = IsiVariable.DONTCARE; } expr { _exprDecision = _input.LT(-1).getText(); 
-		} OPREL { _exprDecision += _input.LT(-1).getText(); 
-		} expr { _exprDecision += _input.LT(-1).getText(); } FP ACH { stack.push(new ArrayList<AbstractCommand>());
+		} (
+		OPRELNUM { verificaOperadorValido(IsiVariable.NUMBER, _exprTipo); }
+		| OPREL
+	) { _exprDecision += _input.LT(-1).getText(); 
+		} expr { _exprDecision += _input.LT(-1).getText(); } (
+		OPLOG { _exprTipo = IsiVariable.DONTCARE; _exprDecision += " " + _input.LT(-1).getText() + " ";
+			} expr { _exprDecision += _input.LT(-1).getText(); 
+		} (
+			OPRELNUM { verificaOperadorValido(IsiVariable.NUMBER, _exprTipo); }
+			| OPREL
+		) { _exprDecision += _input.LT(-1).getText(); 
+		} expr { _exprDecision += _input.LT(-1).getText(); }
+	)* FP ACH { stack.push(new ArrayList<AbstractCommand>());
 		} (cmd+) FCH {
 			CommandRepeticao cmd = new CommandRepeticao(_exprDecision, stack.pop());
 			stack.peek().add(cmd);
@@ -178,13 +205,14 @@ cmdrepeticao:
 expr:
 	termo {
 		verificaTipo(_exprTipo, _tipo);
+		_exprContent = _input.LT(-1).getText();
 	} (
 		(
-			OPNUM { verificaTipo(IsiVariable.NUMBER, _exprTipo); }
+			OPNUM { verificaOperadorValido(IsiVariable.NUMBER, _exprTipo); }
 			| OP
 		) {
 			_exprContent += _input.LT(-1).getText();
-		} termo { verificaTipo(_exprTipo, _tipo);
+		} termo { verificaTipo(_exprTipo, _tipo); _exprContent += _input.LT(-1).getText();
 		}
 	)*;
 
@@ -192,15 +220,12 @@ termo:
 	ID {
         verificaID(_input.LT(-1).getText());
 		use(_input.LT(-1).getText());
-        _exprContent += _input.LT(-1).getText();
 		_tipo = getTypeByID(_input.LT(-1).getText());
     }
 	| NUMBER {
-        _exprContent += _input.LT(-1).getText();
 		_tipo = IsiVariable.NUMBER;
     }
 	| TEXT {
-		_exprContent += _input.LT(-1).getText();
 		_tipo = IsiVariable.TEXT;
 	};
 
@@ -222,7 +247,11 @@ ACH: '{';
 
 FCH: '}';
 
-OPREL: '>' | '<' | '>=' | '<=' | '==' | '!=';
+OPREL: '==' | '!=';
+
+OPRELNUM: '>' | '<' | '>=' | '<=';
+
+OPLOG: 'ou' | 'e';
 
 ID: [a-z] ([a-z] | [A-Z] | [0-9])*;
 

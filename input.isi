@@ -1,7 +1,7 @@
 programa
 
   numero a, b;
-  texto  t1;
+  texto t1;
   texto t2;
 
   leia(a);
@@ -10,9 +10,9 @@ programa
   a = 1 + 2 * 3 / b;
 
   t1 = "banana" + "cacau";
-  
+  t2 = "teste";
 
-  se ( a > b ) {
+  se ( "banana" + " cacau" == t1 ou 1+2 == 3 e t2 != "jujuba") {
      escreva (a);
   }
   senao {
@@ -23,7 +23,7 @@ programa
      escreva (t1);
   }
 
-  enquanto ( a == 20) {
+  enquanto ( a == 20.0) {
      escreva(15);
   }
   
