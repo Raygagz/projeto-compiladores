@@ -2,11 +2,14 @@ programa
 
   numero a, b;
   texto  t1;
+  texto t2;
 
   leia(a);
   leia(b);
   
   a = 1 + 2 * 3 / b;
+
+  t1 = "banana" + "cacau";
   
 
   se ( a > b ) {
@@ -14,6 +17,14 @@ programa
   }
   senao {
      escreva (b);
+  }
+
+  se ( a <= b) {
+     escreva (t1);
+  }
+
+  enquanto ( a == 20) {
+     escreva(15);
   }
   
   

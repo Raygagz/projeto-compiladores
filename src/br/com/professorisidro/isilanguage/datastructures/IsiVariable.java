@@ -1,19 +1,23 @@
 package br.com.professorisidro.isilanguage.datastructures;
 
 public class IsiVariable extends IsiSymbol {
-	
-	public static final int NUMBER=0;
-	public static final int TEXT  =1;
-	
+
+	public static final int DONTCARE = -1;
+	public static final int NUMBER = 0;
+	public static final int TEXT = 1;
+
 	private int type;
 	private String value;
-	
+	private boolean used;
+
 	public IsiVariable(String name, int type, String value) {
 		super(name);
 		this.type = type;
 		this.value = value;
+		this.used = false;
 	}
 
+	@Override
 	public int getType() {
 		return type;
 	}
@@ -31,21 +35,28 @@ public class IsiVariable extends IsiSymbol {
 	}
 
 	@Override
+	public boolean isUsed() {
+		return used;
+	}
+
+	@Override
+	public void use() {
+		this.used = true;
+	}
+
+	@Override
 	public String toString() {
 		return "IsiVariable [name=" + name + ", type=" + type + ", value=" + value + "]";
 	}
-	
+
 	public String generateJavaCode() {
-       String str;
-       if (type == NUMBER) {
-    	   str = "double ";
-       }
-       else {
-    	   str = "String ";
-       }
-       return str + " "+super.name+";";
+		String str;
+		if (type == NUMBER) {
+			str = "double ";
+		} else {
+			str = "String ";
+		}
+		return str + " " + super.name + ";";
 	}
-	
-	
 
 }

@@ -14,25 +14,24 @@ public class IsiProgram {
 
 	public void generateTarget() {
 		StringBuilder str = new StringBuilder();
-		str.append("import java.util.Scanner;\n");
-		str.append("public class MainClass{ \n");
-		str.append("  public static void main(String args[]){\n ");
-		str.append("      Scanner _key = new Scanner(System.in);\n");
-		for (IsiSymbol symbol: varTable.getAll()) {
-			str.append(symbol.generateJavaCode()+"\n");
+		str.append("import java.util.Scanner;\n\n");
+		str.append("public class MainClass {\n");
+		str.append("\tpublic static void main(String args[]) {\n");
+		str.append("\t\tScanner _key = new Scanner(System.in);\n");
+		for (IsiSymbol symbol : varTable.getAll()) {
+			str.append("\t\t" + symbol.generateJavaCode() + "\n");
 		}
-		for (AbstractCommand command: comandos) {
-			str.append(command.generateJavaCode()+"\n");
+		for (AbstractCommand command : comandos) {
+			str.append("\t\t" + command.generateJavaCode() + "\n");
 		}
-		str.append("  }");
+		str.append("\t}\n");
 		str.append("}");
-		
+
 		try {
 			FileWriter fr = new FileWriter(new File("MainClass.java"));
 			fr.write(str.toString());
 			fr.close();
-		}
-		catch(Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
